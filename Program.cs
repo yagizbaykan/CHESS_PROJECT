@@ -163,7 +163,7 @@ namespace SatrancOdevi
             }
         }
 
-        // --- YENI FONKSIYON: Sayiyi tersine cevirmek icin (Satir hesabi) ---
+        // --- YENI FONKSIYON: Sayiyi tersine cevirmek icin (Satir hesabi) ------
         static int SatirNumarasiniBul(char rakam)
         {
             // Kullanici '1' girdiginde dizide 8. indekse denk gelir
