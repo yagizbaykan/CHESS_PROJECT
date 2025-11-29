@@ -1,127 +1,151 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace SatrancOdevi
 {
     class Program
     {
         // 10x10luk dizi
-        static string[,] oyunTahtasi = new string[10, 10];
+        static string[,] oyunTahtasi = new string[8, 8];
         static bool beyazSirasi = true;
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            TahtayiDiz();
+            displayingMenu();
+            choosingMenu();
+        }
 
+        public static void displayingMenu()
+        {
+            Console.WriteLine("|-------------------------------------------------|");
+            Console.WriteLine("|  DOKUZ EYLUL UNIVERSITY EED 1005 CHESS PROJECT  |");
+            Console.WriteLine("|                                                 |");
+            Console.WriteLine("|      1- Play ** 2- Demo Mode 3- Quit Game       |");
+            Console.WriteLine("|-------------------------------------------------|");
+        }
+
+        public static void choosingMenu()
+        {
+            while (true)
+            {
+                Console.WriteLine();
+                Console.Write("Select a mode: ");
+                string input = Console.ReadLine();
+                if (!int.TryParse(input, out int secim))
+                {
+                    Console.WriteLine("Gecersiz secim. Lutfen 1, 2 veya 3 girin.");
+                    continue;
+                }
+
+                switch (secim)
+                {
+                    case 1:
+                        displayingGame();
+                        break;
+                    case 2:
+                        //demoMode();
+                        break;
+                    case 3:
+                        return;
+                    default:
+                        Console.WriteLine("Gecersiz secim. Lutfen 1, 2 veya 3 girin.");
+                        break;
+                }
+            }
+        }
+
+        public static void displayingGame()
+        {
+            // Tahtayi kur
+            TahtayiDiz();
             while (true)
             {
                 Console.Clear();
-                MenuGoster();
+                Console.OutputEncoding = Encoding.UTF8;
                 TahtayiCiz();
-
                 Console.WriteLine();
+                Console.WriteLine(beyazSirasi ? "Beyazin sirasi." : "Siyahin sirasi.");
+                Console.WriteLine("Hamle girin (ornegin: e2 e4). 'menu' donus, 'quit' cikis.");
+                Console.Write("Hamle: ");
+                string giris = Console.ReadLine()?.Trim();
 
-                // O sormus oldugun kisa satiri if-else ile degistirdim:
-                string siraKimde = "";
-                if (beyazSirasi == true)
-                {
-                    siraKimde = "BEYAZ (Buyuk Harf)";
-                }
-                else
-                {
-                    siraKimde = "SIYAH (Kucuk Harf)";
-                }
-
-                Console.WriteLine("Sira: " + siraKimde);
-                Console.Write("Hamlenizi girin (Orn: e2 e4) veya Cikis icin 'q': ");
-
-                string giris = Console.ReadLine();
-
-                if (giris == "q" || giris == "Q")
-                {
-                    Console.WriteLine("Oyun kapatiliyor...");
-                    break;
-                }
+                if (string.IsNullOrEmpty(giris)) continue;
+                if (giris.Equals("menu", StringComparison.OrdinalIgnoreCase)) return;
+                if (giris.Equals("quit", StringComparison.OrdinalIgnoreCase)) Environment.Exit(0);
 
                 HamleYap(giris);
+                // sonraki adimda tahtayi gormek icin kisa bir bekleme veya Console.ReadKey() koyabilirsiniz
             }
         }
 
-        static void MenuGoster()
+        
+
+        public static void TahtayiDiz()
         {
-            // Bu satir kare karakterlerin (■) düzgün cikmasi icin gereklidir.
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine("----------------------------------");
-            Console.WriteLine("  DOKUZ EYLUL EEE - SATRANC V1.0  ");
-            Console.WriteLine("----------------------------------");
+            // Önce tahtayı sıfırla
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 8; j++)
+                    oyunTahtasi[i, j] = null; // Boş kareler null olsun
+
+            string[] taslar = { "k", "q", "b", "n", "r", "b", "n", "r" };
+            // Sıralamayı düzelttim: Genelde Kale(r), At(n), Fil(b), Vezir(q), Şah(k)... gider
+            string[] arkaSira = { "r", "n", "b", "q", "k", "b", "n", "r" };
+
+            for (int i = 0; i < 8; i++)
+            {
+                // Siyahlar (Üstte - Küçük Harf)
+                oyunTahtasi[0, i] = arkaSira[i];
+                oyunTahtasi[1, i] = "p";
+
+                // Beyazlar (Altta - Büyük Harf)
+                oyunTahtasi[7, i] = arkaSira[i].ToUpper();
+                oyunTahtasi[6, i] = "P";
+            }
         }
 
-        static void TahtayiCiz()
+        public static void TahtayiCiz()
         {
-            Console.OutputEncoding = Encoding.UTF8;
+            Console.OutputEncoding = System.Text.Encoding.UTF8; // Çerçeve çizgileri için
 
-            for (int i = 0; i < 10; i++)
+            
+            Console.WriteLine("\n     a  b  c  d  e  f  g  h");
+            Console.WriteLine("   ┌────────────────────────┐");
+
+            for (int i = 0; i < 8; i++)
             {
-                for (int j = 0; j < 10; j++)
+                
+                Console.Write(" " + (8 - i) + " │"); //sol kenar çerçevesi ve numarası
+
+                for (int j = 0; j < 8; j++)
                 {
-                    string kare = oyunTahtasi[i, j];
+                    string kareDegeri = oyunTahtasi[i, j];
 
-                    if (kare == "")
+                    // Eğer karede taş varsa onu yaz
+                    if (kareDegeri != null)
                     {
-                        kare = " ";
+                        Console.Write(" " + kareDegeri + " ");
                     }
-
-                    Console.Write(" " + kare + " ");
-                }
-                Console.WriteLine();
-            }
-        }
-
-        static void TahtayiDiz()
-        {
-            // Kenar suslemeleri dizilerle
-            string[] harfler = { "#", "a", "b", "c", "d", "e", "f", "g", "h", "#" };
-            string[] sayilar = { "#", "8", "7", "6", "5", "4", "3", "2", "1", "#" };
-
-            for (int i = 0; i < 10; i++)
-            {
-                oyunTahtasi[0, i] = harfler[i];
-                oyunTahtasi[9, i] = harfler[i];
-                oyunTahtasi[i, 0] = sayilar[i];
-                oyunTahtasi[i, 9] = sayilar[i];
-            }
-
-            for (int r = 1; r <= 8; r++)
-            {
-                for (int c = 1; c <= 8; c++)
-                {
-                    if ((r + c) % 2 == 0)
-                    {
-                        oyunTahtasi[r, c] = "■";
-                    }
+                    // Taş yoksa, tahta deseni ver (Nokta ve Boşluk ile)
                     else
                     {
-                        oyunTahtasi[r, c] = " ";
+                        // (i + j) % 2 == 0 ise açık renk, değilse koyu renk kare
+                        if ((i + j) % 2 == 0)
+                            Console.Write("   "); // Beyaz kare
+                        else
+                            Console.Write(" · "); // Siyah kare
                     }
                 }
+
+                // Sağ kenar çerçevesi ve numarası
+                Console.WriteLine("│ " + (8 - i));
             }
 
-            oyunTahtasi[0, 0] = "#"; oyunTahtasi[0, 9] = "#";
-            oyunTahtasi[9, 0] = "#"; oyunTahtasi[9, 9] = "#";
-
-            string[] tasSirasi = { " ", "r", "n", "b", "q", "k", "b", "n", "r" };
-
-            for (int k = 1; k <= 8; k++)
-            {
-                oyunTahtasi[2, k] = "p";
-                oyunTahtasi[7, k] = "P";
-
-                oyunTahtasi[1, k] = tasSirasi[k];
-                oyunTahtasi[8, k] = tasSirasi[k].ToUpper();
-            }
+            // Alt Çerçeve ve Harfler
+            Console.WriteLine("   └────────────────────────┘");
+            Console.WriteLine("     a  b  c  d  e  f  g  h\n");
         }
+        
 
-        // --- YENI FONKSIYON: Sırf ASCII matematigi yapmamak icin ---
+        // --- YENI FONKSIYON: Sırf ASCII matematigi yapmamak icin ----
         static int HarfiSayiyaCevir(char harf)
         {
             // switch-case ile tek tek kontrol ediyoruz. Tam ogrenci isi.
@@ -159,7 +183,7 @@ namespace SatrancOdevi
 
         static void HamleYap(string giris)
         {
-            string[] parcalar = giris.Split(' ');
+            string[] parcalar = giris.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parcalar.Length != 2)
             {
                 HataMesaji("Lutfen iki koordinat girin.");
