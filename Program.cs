@@ -5,13 +5,13 @@ namespace SatrancOdevi
 {
     class Program
     {
-        
+
         static string[,] oyunTahtasi = new string[8, 8];
         static bool beyazSirasi = true;
 
         public static void Main(string[] args)
         {
-            
+
             Console.OutputEncoding = Encoding.UTF8;
             DisplayingMenu();
             ChoosingMode();
@@ -19,11 +19,13 @@ namespace SatrancOdevi
 
         public static void DisplayingMenu()
         {
-            Console.WriteLine("|-------------------------------------------------|");
-            Console.WriteLine("|  DOKUZ EYLUL UNIVERSITY EED 1005 CHESS PROJECT  |");
-            Console.WriteLine("|                                                 |");
-            Console.WriteLine("|      1- Play ** 2- Demo Mode 3- Quit Game       |");
-            Console.WriteLine("|-------------------------------------------------|");
+            Console.WriteLine("♛                                                ♛");
+            Console.WriteLine("╔═════════════════════════════════════════════════╗");
+            Console.WriteLine("║  DOKUZ EYLUL UNIVERSITY EED 1005 CHESS PROJECT  ║");
+            Console.WriteLine("║                                                 ║");
+            Console.WriteLine("║  ** 1- Play ** 2- Demo Mode ** 3- Quit Game **  ║");
+            Console.WriteLine("╚═════════════════════════════════════════════════╝");
+            Console.WriteLine("♛                                                ♛");
         }
 
         public static void ChoosingMode()
@@ -31,7 +33,7 @@ namespace SatrancOdevi
             while (true)
             {
                 Console.WriteLine();
-                Console.Write("Select a mode: ");
+                Console.Write("Make a choice: ");
                 string input = Console.ReadLine();
 
                 switch (input)
@@ -40,14 +42,14 @@ namespace SatrancOdevi
                         GameMode();
                         break;
                     case "2":
-                        Console.WriteLine("Demo modu henüz aktif değil.");
+                        //DemoMode();
                         break;
                     case "3":
-                        Console.WriteLine("Oyundan çıkılıyor...");
+                        Console.WriteLine("Exiting...");
                         Environment.Exit(0);
                         break;
                     default:
-                        Console.WriteLine("Geçersiz seçim. Lütfen 1, 2 veya 3 girin.");
+                        Console.WriteLine("Invalid choice. Please enter 1,2 or 3.");
                         continue;
                 }
             }
@@ -55,7 +57,7 @@ namespace SatrancOdevi
 
         public static void TasYerlestirme()
         {
-            string[] whites = { "r", "n", "b", "q", "k", "b", "n", "r" }; 
+            string[] whites = { "r", "n", "b", "q", "k", "b", "n", "r" };
             string[] blacks = { "r", "n", "b", "q", "k", "b", "n", "r" };
 
             // Önce tüm tahtayı sıfırla (null yap)
@@ -96,7 +98,7 @@ namespace SatrancOdevi
                         if ((i + j) % 2 == 0)
                             Console.Write("   "); // Beyaz kare (Boşluk)
                         else
-                            Console.Write(" ◆ "); // Siyah kare (Nokta)
+                            Console.Write(" ♦ "); // Siyah kare 
                     }
                 }
                 Console.WriteLine("│ " + (8 - i));
@@ -119,9 +121,23 @@ namespace SatrancOdevi
                 else
                     Console.WriteLine("It's Black's Turn (Lower Letters).");
 
-                Console.Write("Enter your movement (eg: e2 e4): ");
+                Console.Write("Enter your movement (eg: e2 e4) or type 'quit' to exit: ");
                 string hamle = Console.ReadLine();
-                HamleYap(hamle);
+
+                if (string.IsNullOrWhiteSpace(hamle))
+                    continue;
+
+                string komut = hamle.Trim().ToLower();
+
+                
+                if (komut == "quit" || komut == "exit" || komut == "q")
+                {
+                    Console.WriteLine("Exiting...");
+                    Environment.Exit(0);
+                }
+
+                HamleYap(komut);
+
             }
         }
 
@@ -217,7 +233,7 @@ namespace SatrancOdevi
             // Kurallara Uygunluk Kontrolü
             if (HareketGecerliMi(satirBas, sutunBas, satirHedef, sutunHedef, secilenTas) == false)
             {
-                HataMesaji("Invalid movement (Tas kurallara uymuyor).");
+                HataMesaji("Invalid movement.");
                 return;
             }
 
@@ -359,10 +375,10 @@ namespace SatrancOdevi
             return true;
         }
 
-        static void HataMesaji(string mesaj)
+        public static void HataMesaji(string mesaj)
         {
-            Console.WriteLine(">>> HATA: " + mesaj);
-            Console.WriteLine("Devam etmek icin bir tusa basin...");
+            Console.WriteLine(">>> Error: " + mesaj);
+            Console.WriteLine("Enter any button to continue...");
             Console.ReadKey();
         }
     }
