@@ -1,20 +1,23 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace SatrancOdevi
 {
     class Program
     {
-        // 10x10luk dizi
+        
         static string[,] oyunTahtasi = new string[8, 8];
         static bool beyazSirasi = true;
 
         public static void Main(string[] args)
         {
-            displayingMenu();
-            choosingMenu();
+            
+            Console.OutputEncoding = Encoding.UTF8;
+            DisplayingMenu();
+            ChoosingMode();
         }
 
-        public static void displayingMenu()
+        public static void DisplayingMenu()
         {
             Console.WriteLine("|-------------------------------------------------|");
             Console.WriteLine("|  DOKUZ EYLUL UNIVERSITY EED 1005 CHESS PROJECT  |");
@@ -23,200 +26,171 @@ namespace SatrancOdevi
             Console.WriteLine("|-------------------------------------------------|");
         }
 
-        public static void choosingMenu()
+        public static void ChoosingMode()
         {
             while (true)
             {
                 Console.WriteLine();
                 Console.Write("Select a mode: ");
                 string input = Console.ReadLine();
-                if (!int.TryParse(input, out int secim))
-                {
-                    Console.WriteLine("Gecersiz secim. Lutfen 1, 2 veya 3 girin.");
-                    continue;
-                }
 
-                switch (secim)
+                switch (input)
                 {
-                    case 1:
-                        displayingGame();
+                    case "1":
+                        GameMode();
                         break;
-                    case 2:
-                        //demoMode();
+                    case "2":
+                        Console.WriteLine("Demo modu henüz aktif değil.");
                         break;
-                    case 3:
-                        return;
+                    case "3":
+                        Console.WriteLine("Oyundan çıkılıyor...");
+                        Environment.Exit(0);
+                        break;
                     default:
-                        Console.WriteLine("Gecersiz secim. Lutfen 1, 2 veya 3 girin.");
-                        break;
+                        Console.WriteLine("Geçersiz seçim. Lütfen 1, 2 veya 3 girin.");
+                        continue;
                 }
             }
         }
 
-        public static void displayingGame()
+        public static void TasYerlestirme()
         {
-            // Tahtayi kur
-            TahtayiDiz();
-            while (true)
-            {
-                Console.Clear();
-                Console.OutputEncoding = Encoding.UTF8;
-                TahtayiCiz();
-                Console.WriteLine();
-                Console.WriteLine(beyazSirasi ? "Beyazin sirasi." : "Siyahin sirasi.");
-                Console.WriteLine("Hamle girin (ornegin: e2 e4). 'menu' donus, 'quit' cikis.");
-                Console.Write("Hamle: ");
-                string giris = Console.ReadLine()?.Trim();
+            string[] whites = { "r", "n", "b", "q", "k", "b", "n", "r" }; 
+            string[] blacks = { "r", "n", "b", "q", "k", "b", "n", "r" };
 
-                if (string.IsNullOrEmpty(giris)) continue;
-                if (giris.Equals("menu", StringComparison.OrdinalIgnoreCase)) return;
-                if (giris.Equals("quit", StringComparison.OrdinalIgnoreCase)) Environment.Exit(0);
-
-                HamleYap(giris);
-                // sonraki adimda tahtayi gormek icin kisa bir bekleme veya Console.ReadKey() koyabilirsiniz
-            }
-        }
-
-        
-
-        public static void TahtayiDiz()
-        {
-            // Önce tahtayı sıfırla
+            // Önce tüm tahtayı sıfırla (null yap)
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
-                    oyunTahtasi[i, j] = null; // Boş kareler null olsun
-
-            string[] taslar = { "k", "q", "b", "n", "r", "b", "n", "r" };
-            // Sıralamayı düzelttim: Genelde Kale(r), At(n), Fil(b), Vezir(q), Şah(k)... gider
-            string[] arkaSira = { "r", "n", "b", "q", "k", "b", "n", "r" };
+                    oyunTahtasi[i, j] = null;
 
             for (int i = 0; i < 8; i++)
             {
-                // Siyahlar (Üstte - Küçük Harf)
-                oyunTahtasi[0, i] = arkaSira[i];
-                oyunTahtasi[1, i] = "p";
+                oyunTahtasi[0, i] = blacks[i];       // Siyah taşlar
+                oyunTahtasi[1, i] = "p";             // Siyah piyonlar
 
-                // Beyazlar (Altta - Büyük Harf)
-                oyunTahtasi[7, i] = arkaSira[i].ToUpper();
-                oyunTahtasi[6, i] = "P";
+                oyunTahtasi[7, i] = whites[i].ToUpper(); // Beyaz taşlar
+                oyunTahtasi[6, i] = "P";                 // Beyaz piyonlar
             }
         }
 
         public static void TahtayiCiz()
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8; // Çerçeve çizgileri için
-
-            
             Console.WriteLine("\n     a  b  c  d  e  f  g  h");
             Console.WriteLine("   ┌────────────────────────┐");
 
             for (int i = 0; i < 8; i++)
             {
-                
-                Console.Write(" " + (8 - i) + " │"); //sol kenar çerçevesi ve numarası
+                Console.Write(" " + (8 - i) + " │"); // Satır numarası
 
                 for (int j = 0; j < 8; j++)
                 {
                     string kareDegeri = oyunTahtasi[i, j];
 
-                    // Eğer karede taş varsa onu yaz
                     if (kareDegeri != null)
                     {
                         Console.Write(" " + kareDegeri + " ");
                     }
-                    // Taş yoksa, tahta deseni ver (Nokta ve Boşluk ile)
                     else
                     {
-                        // (i + j) % 2 == 0 ise açık renk, değilse koyu renk kare
+                        // Boş kare deseni
                         if ((i + j) % 2 == 0)
-                            Console.Write("   "); // Beyaz kare
+                            Console.Write("   "); // Beyaz kare (Boşluk)
                         else
-                            Console.Write(" · "); // Siyah kare
+                            Console.Write(" ◆ "); // Siyah kare (Nokta)
                     }
                 }
-
-                // Sağ kenar çerçevesi ve numarası
                 Console.WriteLine("│ " + (8 - i));
             }
 
-            // Alt Çerçeve ve Harfler
             Console.WriteLine("   └────────────────────────┘");
             Console.WriteLine("     a  b  c  d  e  f  g  h\n");
         }
-        
 
-        // --- YENI FONKSIYON: Sırf ASCII matematigi yapmamak icin ----
-        static int HarfiSayiyaCevir(char harf)
+        public static void GameMode()
         {
-            // switch-case ile tek tek kontrol ediyoruz. Tam ogrenci isi.
-            switch (harf)
+            TasYerlestirme();
+            while (true)
             {
-                case 'a': return 1;
-                case 'b': return 2;
-                case 'c': return 3;
-                case 'd': return 4;
-                case 'e': return 5;
-                case 'f': return 6;
-                case 'g': return 7;
-                case 'h': return 8;
-                default: return -1; // Hata kodu
+                Console.Clear();
+                TahtayiCiz();
+
+                if (beyazSirasi)
+                    Console.WriteLine("It's White's Turn (Upper Letters).");
+                else
+                    Console.WriteLine("It's Black's Turn (Lower Letters).");
+
+                Console.Write("Enter your movement (eg: e2 e4): ");
+                string hamle = Console.ReadLine();
+                HamleYap(hamle);
             }
         }
 
-        // --- YENI FONKSIYON: Sayiyi tersine cevirmek icin (Satir hesabi) ------
-        static int SatirNumarasiniBul(char rakam)
+        // --- YARDIMCI METOTLAR ---
+
+        static int HarfiSayiyaCevir(char harf)
         {
-            // Kullanici '1' girdiginde dizide 8. indekse denk gelir
-            switch (rakam)
+            switch (harf)
             {
-                case '1': return 8;
-                case '2': return 7;
-                case '3': return 6;
-                case '4': return 5;
-                case '5': return 4;
-                case '6': return 3;
-                case '7': return 2;
-                case '8': return 1;
+                case 'a': return 0; // Dizi indeksi 0'dan başlar
+                case 'b': return 1;
+                case 'c': return 2;
+                case 'd': return 3;
+                case 'e': return 4;
+                case 'f': return 5;
+                case 'g': return 6;
+                case 'h': return 7;
                 default: return -1;
             }
         }
 
-        static void HamleYap(string giris)
+        static int SatirNumarasiniBul(char rakam)
         {
+            // '8' -> index 0
+            // '1' -> index 7
+            if (rakam >= '1' && rakam <= '8')
+                return 8 - (rakam - '0');
+            return -1;
+        }
+
+        public static void HamleYap(string giris)
+        {
+            if (string.IsNullOrWhiteSpace(giris)) return;
+
             string[] parcalar = giris.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parcalar.Length != 2)
             {
-                HataMesaji("Lutfen iki koordinat girin.");
+                HataMesaji("Enter two coordinates. (eg: a2 a3).");
                 return;
             }
 
-            string nereden = parcalar[0].ToLower();
-            string nereye = parcalar[1].ToLower();
+            string from = parcalar[0].ToLower();
+            string to = parcalar[1].ToLower();
 
-            if (nereden.Length != 2 || nereye.Length != 2)
+            if (from.Length != 2 || to.Length != 2)
             {
-                HataMesaji("Koordinatlar 2 karakter olmali.");
+                HataMesaji("Coordinates must be two characters.");
                 return;
             }
 
-            // BURADA DEGISIKLIK YAPTIK: Artik matematik yok, fonksiyon cagiriyoruz.
-            int sutunBas = HarfiSayiyaCevir(nereden[0]);
-            int satirBas = SatirNumarasiniBul(nereden[1]);
+            int sutunBas = HarfiSayiyaCevir(from[0]);
+            int satirBas = SatirNumarasiniBul(from[1]);
 
-            int sutunHedef = HarfiSayiyaCevir(nereye[0]);
-            int satirHedef = SatirNumarasiniBul(nereye[1]);
+            int sutunHedef = HarfiSayiyaCevir(to[0]);
+            int satirHedef = SatirNumarasiniBul(to[1]);
 
             if (sutunBas == -1 || satirBas == -1 || sutunHedef == -1 || satirHedef == -1)
             {
-                HataMesaji("Gecersiz koordinat girdiniz.");
+                HataMesaji("Invalid coordinate.");
                 return;
             }
 
             // Tas Kontrolu
             string secilenTas = oyunTahtasi[satirBas, sutunBas];
-            if (secilenTas == " " || secilenTas == "■")
+
+            // ÖNEMLİ DÜZELTME: null kontrolü
+            if (secilenTas == null)
             {
-                HataMesaji("Orada tas yok.");
+                HataMesaji("No chessman on the square you've choosen.");
                 return;
             }
 
@@ -224,139 +198,133 @@ namespace SatrancOdevi
             bool tasBeyaz = char.IsUpper(secilenTas[0]);
             if (tasBeyaz != beyazSirasi)
             {
-                HataMesaji("Sira sizde degil!");
+                HataMesaji("It's not your turn.");
                 return;
             }
 
-            // Hedefteki Tas Kontrolu
+            // Hedefteki Tas Kontrolu (Kendi taşını yeme)
             string hedefTas = oyunTahtasi[satirHedef, sutunHedef];
-            if (hedefTas != " " && hedefTas != "■")
+            if (hedefTas != null)
             {
                 bool hedefBeyaz = char.IsUpper(hedefTas[0]);
                 if (tasBeyaz == hedefBeyaz)
                 {
-                    HataMesaji("Kendi tasini yiyemezsin.");
+                    HataMesaji("You cannot take your chessman.");
                     return;
                 }
             }
 
+            // Kurallara Uygunluk Kontrolü
             if (HareketGecerliMi(satirBas, sutunBas, satirHedef, sutunHedef, secilenTas) == false)
             {
-                HataMesaji("Gecersiz hamle.");
+                HataMesaji("Invalid movement (Tas kurallara uymuyor).");
                 return;
             }
 
-            // Hamle Isleme
-            if ((satirBas + sutunBas) % 2 == 0)
-            {
-                oyunTahtasi[satirBas, sutunBas] = "■";
-            }
-            else
-            {
-                oyunTahtasi[satirBas, sutunBas] = " ";
-            }
+            // --- HAMLE İŞLEME ---
+            // Eski yeri null yapıyoruz ki tahta deseni bozulmasın
+            oyunTahtasi[satirBas, sutunBas] = null;
 
+            // Yeni yere taşı koy
             oyunTahtasi[satirHedef, sutunHedef] = secilenTas;
 
-            // Sirayi degistir (Tersini al)
+            // Sırayı değiştir
             beyazSirasi = !beyazSirasi;
         }
 
         static bool HareketGecerliMi(int r1, int c1, int r2, int c2, string tas)
         {
-            string tip = tas.ToLower();
+            string tip = tas.ToLower(); // p, r, n, b, q, k
 
-            // Math.Abs yerine basit cikarma ve if kullanabiliriz ama 
-            // Math.Abs genelde bilinen bir seydir. Yine de garanti olsun diye elle yapalim:
-            int dY = r2 - r1;
-            if (dY < 0) dY = -dY; // Mutlak deger alma (elle)
+            int dY = r2 - r1; // Satır farkı
+            int dX = c2 - c1; // Sütun farkı
 
-            int dX = c2 - c1;
-            if (dX < 0) dX = -dX;
+            // Mutlak değerler (yön bağımsız mesafe)
+            int absDY = Math.Abs(dY);
+            int absDX = Math.Abs(dX);
 
-            // PIYON
+            // 1. PIYON (PAWN)
             if (tip == "p")
             {
-                // Ternary operator (? :) kaldirildi, if-else yapildi
                 int yon = 0;
                 int baslangic = 0;
 
-                if (tas == "P")
+                if (tas == "P") // BEYAZ
                 {
-                    yon = -1;       // Beyaz yukari gider (index azalir)
-                    baslangic = 7;  // Beyazin baslangic satiri
+                    yon = -1;       // Yukarı gider (index azalır)
+                    baslangic = 6;  // Beyaz piyonlar 6. indextedir (Tahtada 2. satır)
                 }
-                else
+                else // SIYAH
                 {
-                    yon = 1;        // Siyah asagi gider (index artar)
-                    baslangic = 2;  // Siyahin baslangic satiri
+                    yon = 1;        // Aşağı gider (index artar)
+                    baslangic = 1;  // Siyah piyonlar 1. indextedir (Tahtada 7. satır)
                 }
 
-                if (c1 == c2) // Duz gitme
+                // Düz Gitme
+                if (c1 == c2)
                 {
-                    if (r2 == r1 + yon && (oyunTahtasi[r2, c2] == " " || oyunTahtasi[r2, c2] == "■"))
+                    // 1 adım
+                    if (r2 == r1 + yon && oyunTahtasi[r2, c2] == null)
                         return true;
 
-                    if (r1 == baslangic && r2 == r1 + (yon + yon))
+                    // 2 adım (Başlangıçtaysa ve yol boşsa)
+                    if (r1 == baslangic && r2 == r1 + (2 * yon))
                     {
-                        if (YolBosMu(r1, c1, r2, c2) == true)
-                        {
-                            if (oyunTahtasi[r2, c2] == " " || oyunTahtasi[r2, c2] == "■")
-                                return true;
-                        }
-                    }
-                }
-                else // Capraz yeme
-                {
-                    int xFark = c2 - c1;
-                    if (xFark < 0) xFark = -xFark;
-
-                    if (xFark == 1 && r2 == r1 + yon)
-                    {
-                        string hedef = oyunTahtasi[r2, c2];
-                        if (hedef != " " && hedef != "■")
+                        // Önündeki ve hedef kare boş olmalı
+                        if (oyunTahtasi[r1 + yon, c1] == null && oyunTahtasi[r2, c2] == null)
                             return true;
                     }
+                }
+                // Çapraz Yeme
+                else if (absDX == 1 && r2 == r1 + yon)
+                {
+                    if (oyunTahtasi[r2, c2] != null) // Hedefte taş varsa (rengi yukarıda kontrol edildi)
+                        return true;
                 }
                 return false;
             }
 
-            // KALE
+            // 2. KALE (ROOK)
             if (tip == "r")
             {
+                // Ya satır aynı ya sütun aynı olmalı
                 if (r1 == r2 || c1 == c2)
                     return YolBosMu(r1, c1, r2, c2);
                 return false;
             }
 
-            // FIL
+            // 3. FIL (BISHOP)
             if (tip == "b")
             {
-                if (dY == dX)
+                // Çapraz gitmeli (dY ve dX eşit olmalı)
+                if (absDY == absDX)
                     return YolBosMu(r1, c1, r2, c2);
                 return false;
             }
 
-            // VEZIR
+            // 4. VEZIR (QUEEN)
             if (tip == "q")
             {
-                if ((r1 == r2 || c1 == c2) || (dY == dX))
+                // Kale gibi veya Fil gibi gidebilir
+                if ((r1 == r2 || c1 == c2) || (absDY == absDX))
                     return YolBosMu(r1, c1, r2, c2);
                 return false;
             }
 
-            // AT
+            // 5. AT (KNIGHT)
             if (tip == "n")
             {
-                if ((dY == 2 && dX == 1) || (dY == 1 && dX == 2))
-                    return true;
+                // L Hareketi: 2'ye 1 veya 1'e 2
+                if ((absDY == 2 && absDX == 1) || (absDY == 1 && absDX == 2))
+                    return true; // At taşların üzerinden atlar, yol kontrolü gerekmez.
                 return false;
             }
 
-            // SAH
+            // 6. SAH (KING)
             if (tip == "k")
             {
-                if (dY <= 1 && dX <= 1)
+                // Her yöne 1 birim
+                if (absDY <= 1 && absDX <= 1)
                     return true;
                 return false;
             }
@@ -366,27 +334,27 @@ namespace SatrancOdevi
 
         static bool YolBosMu(int r1, int c1, int r2, int c2)
         {
-            // Math.Sign yerine elle kontrol (Prosedurel mantik)
             int rArtis = 0;
             if (r2 > r1) rArtis = 1;
-            if (r2 < r1) rArtis = -1;
+            else if (r2 < r1) rArtis = -1;
 
             int cArtis = 0;
             if (c2 > c1) cArtis = 1;
-            if (c2 < c1) cArtis = -1;
+            else if (c2 < c1) cArtis = -1;
 
             int r = r1 + rArtis;
             int c = c1 + cArtis;
 
+            // Hedef kareye gelene kadar aradaki karelere bak
             while (r != r2 || c != c2)
             {
-                if (oyunTahtasi[r, c] != " " && oyunTahtasi[r, c] != "■")
+                if (oyunTahtasi[r, c] != null)
                 {
-                    return false; // Engel var
+                    return false; // Arada taş var
                 }
 
-                r = r + rArtis;
-                c = c + cArtis;
+                r += rArtis;
+                c += cArtis;
             }
             return true;
         }
