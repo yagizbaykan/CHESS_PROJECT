@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
-
+using System.IO;
+using System.ComponentModel.Design;
 namespace SatrancOdevi
 {
     class Program
@@ -32,6 +33,9 @@ namespace SatrancOdevi
         {
             while (true)
             {
+                Console.Clear();   
+                DisplayingMenu();  
+
                 Console.WriteLine();
                 Console.Write("Make a choice: ");
                 string input = Console.ReadLine();
@@ -42,7 +46,7 @@ namespace SatrancOdevi
                         GameMode();
                         break;
                     case "2":
-                        //DemoMode();
+                        DemoMode();
                         break;
                     case "3":
                         Console.WriteLine("Exiting...");
@@ -108,37 +112,102 @@ namespace SatrancOdevi
             Console.WriteLine("     a  b  c  d  e  f  g  h\n");
         }
 
-        public static void GameMode()
+        // Parametre varsayılan olarak false, yani sıfırdan başlar.
+        public static void GameMode(bool devamEdiliyor = false)
         {
-            TasYerlestirme();
+            // Eğer demo modundan gelmediysek taşları sıfırla
+            if (devamEdiliyor == false)
+            {
+                TasYerlestirme();
+                beyazSirasi = true; // Sırayı da sıfırla
+            }
+
             while (true)
             {
+                // mevcut döngü
                 Console.Clear();
                 TahtayiCiz();
 
                 if (beyazSirasi)
-                    Console.WriteLine("It's White's Turn (Upper Letters).");
+                    Console.WriteLine("Sıra Beyazda (Büyük Harfler).");
                 else
-                    Console.WriteLine("It's Black's Turn (Lower Letters).");
+                    Console.WriteLine("Sıra Siyahda (Küçük Harfler).");
 
-                Console.Write("Enter your movement (eg: e2 e4) or type 'quit' to exit: ");
+                Console.Write("Hamle giriniz (örn: e2 e4) veya çıkmak için 'quit': ");
                 string hamle = Console.ReadLine();
 
-                if (string.IsNullOrWhiteSpace(hamle))
-                    continue;
+                if (string.IsNullOrWhiteSpace(hamle)) continue;
 
                 string komut = hamle.Trim().ToLower();
 
-                
                 if (komut == "quit" || komut == "exit" || komut == "q")
                 {
-                    Console.WriteLine("Exiting...");
-                    Environment.Exit(0);
+                    // Oyundan çıkınca ana menüye dönmek daha mantıklı olabilir
+                    break;
                 }
 
                 HamleYap(komut);
-
             }
+        }
+        public static void DemoMode()
+        {
+            string dosyaYolu = "C:\\Users\\yagiz\\Desktop\\movements.txt";
+
+            if (!File.Exists(dosyaYolu))
+            {
+                Console.WriteLine("Hata: movements.txt dosyası bulunamadı!");
+                Console.WriteLine("Devam etmek için bir tuşa bas...");
+                Console.ReadKey();
+                return;
+            }
+
+            // 1. Dosyadaki tüm satırları oku (Her satır bir hamle: "e2 e4" gibi)
+            string[] hamleler = File.ReadAllLines(dosyaYolu);
+
+            // Tahtayı ilk haline getir ve çiz
+            TasYerlestirme();
+            TahtayiCiz();
+
+            Console.WriteLine("--- DEMO MODE ---");
+            Console.WriteLine("SPACE: Sonraki Hamle | P: Play Mode'a Geç | ESC: Çıkış");
+
+            int hamleSirasi = 0;
+            while (hamleSirasi < hamleler.Length)
+            {
+                Console.Write($"\nSıradaki hamle ({hamleler[hamleSirasi]}) için SPACE tuşuna bas: ");
+
+                // Kullanıcıdan tuş bekle
+                ConsoleKeyInfo tus = Console.ReadKey(true); // true parametresi basılan tuşu ekrana yazmaz
+
+                //  Space tuşu kontrolü
+                if (tus.Key == ConsoleKey.Spacebar)
+                {
+                    string gelenHamle = hamleler[hamleSirasi];
+
+                    Console.WriteLine(gelenHamle); // Hamleyi ekrana yaz
+                    HamleYap(gelenHamle);          // Hamleyi işlet
+
+                    Console.Clear();
+                    TahtayiCiz();                  // Tahtayı güncelle
+
+                    Console.WriteLine($"Oynanan Hamle: {gelenHamle}");
+                    hamleSirasi++;
+                }
+                  
+                else if (tus.Key == ConsoleKey.P)
+                {
+                    Console.WriteLine("\nPlay Mode'a geçiliyor...");
+                    GameMode(devamEdiliyor: true); // GameMode'u parametreli yapmamız gerekecek
+                    return;
+                }
+                else if (tus.Key == ConsoleKey.Escape)
+                {
+                    return;
+                }
+            }
+
+            Console.WriteLine("\nDemo bitti! Ana menüye dönülüyor...");
+            Console.ReadKey();
         }
 
         // --- YARDIMCI METOTLAR ---
