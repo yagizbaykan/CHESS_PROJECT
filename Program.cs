@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-using System.IO;
-using System.ComponentModel.Design;
+﻿using System.Text;
 namespace SatrancOdevi
 {
     class Program
@@ -64,18 +61,18 @@ namespace SatrancOdevi
             string[] whites = { "r", "n", "b", "q", "k", "b", "n", "r" };
             string[] blacks = { "r", "n", "b", "q", "k", "b", "n", "r" };
 
-            // Önce tüm tahtayı sıfırla (null yap)
+            // once tüm tahtayı sıfırla 
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
                     oyunTahtasi[i, j] = null;
 
             for (int i = 0; i < 8; i++)
             {
-                oyunTahtasi[0, i] = blacks[i];       // Siyah taşlar
-                oyunTahtasi[1, i] = "p";             // Siyah piyonlar
+                oyunTahtasi[0, i] = blacks[i];       // siyah taşlar
+                oyunTahtasi[1, i] = "p";             // siyah piyonlar
 
-                oyunTahtasi[7, i] = whites[i].ToUpper(); // Beyaz taşlar
-                oyunTahtasi[6, i] = "P";                 // Beyaz piyonlar
+                oyunTahtasi[7, i] = whites[i].ToUpper(); // beyaz taşlar
+                oyunTahtasi[6, i] = "P";                 // beyaz piyonlar
             }
         }
 
@@ -86,7 +83,7 @@ namespace SatrancOdevi
 
             for (int i = 0; i < 8; i++)
             {
-                Console.Write(" " + (8 - i) + " │"); // Satır numarası
+                Console.Write(" " + (8 - i) + " │"); // satır numarası
 
                 for (int j = 0; j < 8; j++)
                 {
@@ -98,11 +95,11 @@ namespace SatrancOdevi
                     }
                     else
                     {
-                        // Boş kare deseni
+                        //boş kareler
                         if ((i + j) % 2 == 0)
-                            Console.Write("   "); // Beyaz kare (Boşluk)
+                            Console.Write("   "); // beyaz kare 
                         else
-                            Console.Write(" ♦ "); // Siyah kare 
+                            Console.Write(" ♦ "); // siyah kare 
                     }
                 }
                 Console.WriteLine("│ " + (8 - i));
@@ -112,7 +109,7 @@ namespace SatrancOdevi
             Console.WriteLine("     a  b  c  d  e  f  g  h\n");
         }
 
-        // Parametre varsayılan olarak false, yani sıfırdan başlar.
+        // parametre varsayılan olarak false yani sıfırdan başlar.
         public static void GameMode(bool devamEdiliyor = false)
         {
             // Eğer demo modundan gelmediysek taşları sıfırla
@@ -129,11 +126,11 @@ namespace SatrancOdevi
                 TahtayiCiz();
 
                 if (beyazSirasi)
-                    Console.WriteLine("Sıra Beyazda (Büyük Harfler).");
+                    Console.WriteLine("It's White's turn (Upper Letters) .");
                 else
-                    Console.WriteLine("Sıra Siyahda (Küçük Harfler).");
+                    Console.WriteLine("It's Black's turn (Lower Letters) .");
 
-                Console.Write("Hamle giriniz (örn: e2 e4) veya çıkmak için 'quit': ");
+                Console.Write("Enter a movement (eg: e2 e4) or write 'quit' to quit: ");
                 string hamle = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(hamle)) continue;
@@ -142,7 +139,6 @@ namespace SatrancOdevi
 
                 if (komut == "quit" || komut == "exit" || komut == "q")
                 {
-                    // Oyundan çıkınca ana menüye dönmek daha mantıklı olabilir
                     break;
                 }
 
@@ -155,48 +151,47 @@ namespace SatrancOdevi
 
             if (!File.Exists(dosyaYolu))
             {
-                Console.WriteLine("Hata: movements.txt dosyası bulunamadı!");
-                Console.WriteLine("Devam etmek için bir tuşa bas...");
+                Console.WriteLine("Error: movements.txt file not found!");
+                Console.WriteLine("Press any button to continue...");
                 Console.ReadKey();
                 return;
             }
 
-            // 1. Dosyadaki tüm satırları oku (Her satır bir hamle: "e2 e4" gibi)
             string[] hamleler = File.ReadAllLines(dosyaYolu);
 
-            // Tahtayı ilk haline getir ve çiz
             TasYerlestirme();
             TahtayiCiz();
 
             Console.WriteLine("--- DEMO MODE ---");
-            Console.WriteLine("SPACE: Sonraki Hamle | P: Play Mode'a Geç | ESC: Çıkış");
+            Console.WriteLine("SPACE: Next Movement | P: Play Mode | ESC: Exit");
 
             int hamleSirasi = 0;
             while (hamleSirasi < hamleler.Length)
             {
-                Console.Write($"\nSıradaki hamle ({hamleler[hamleSirasi]}) için SPACE tuşuna bas: ");
+                Console.Write($"\nPress SPACE button for next movement ({hamleler[hamleSirasi]})");
 
-                // Kullanıcıdan tuş bekle
                 ConsoleKeyInfo tus = Console.ReadKey(true); // true parametresi basılan tuşu ekrana yazmaz
 
-                //  Space tuşu kontrolü
                 if (tus.Key == ConsoleKey.Spacebar)
                 {
                     string gelenHamle = hamleler[hamleSirasi];
 
-                    Console.WriteLine(gelenHamle); // Hamleyi ekrana yaz
-                    HamleYap(gelenHamle);          // Hamleyi işlet
+                    Console.WriteLine(gelenHamle); 
+                    HamleYap(gelenHamle);          
 
                     Console.Clear();
-                    TahtayiCiz();                  // Tahtayı güncelle
+                    TahtayiCiz();                  
 
-                    Console.WriteLine($"Oynanan Hamle: {gelenHamle}");
+                    Console.WriteLine($"Move Played: {gelenHamle}");
                     hamleSirasi++;
+
+                    Console.WriteLine();
+                    Console.WriteLine();
                 }
                   
                 else if (tus.Key == ConsoleKey.P)
                 {
-                    Console.WriteLine("\nPlay Mode'a geçiliyor...");
+                    Console.WriteLine("Preparing Play Mode...");
                     GameMode(devamEdiliyor: true); // GameMode'u parametreli yapmamız gerekecek
                     return;
                 }
@@ -204,9 +199,11 @@ namespace SatrancOdevi
                 {
                     return;
                 }
+                
+
             }
 
-            Console.WriteLine("\nDemo bitti! Ana menüye dönülüyor...");
+            Console.WriteLine("Demo Mode is over, returning to the main menu...");
             Console.ReadKey();
         }
 
@@ -321,14 +318,14 @@ namespace SatrancOdevi
         {
             string tip = tas.ToLower(); // p, r, n, b, q, k
 
-            int dY = r2 - r1; // Satır farkı
-            int dX = c2 - c1; // Sütun farkı
+            int dY = r2 - r1; // satır farkı
+            int dX = c2 - c1; // sütun farkı
 
-            // Mutlak değerler (yön bağımsız mesafe)
+            // yön bağımsız mesafe
             int absDY = Math.Abs(dY);
             int absDX = Math.Abs(dX);
 
-            // 1. PIYON (PAWN)
+            // 1. PIYON
             if (tip == "p")
             {
                 int yon = 0;
@@ -336,7 +333,7 @@ namespace SatrancOdevi
 
                 if (tas == "P") // BEYAZ
                 {
-                    yon = -1;       // Yukarı gider (index azalır)
+                    yon = -1;       // yukarı gider (index azalır)
                     baslangic = 6;  // Beyaz piyonlar 6. indextedir (Tahtada 2. satır)
                 }
                 else // SIYAH
@@ -430,12 +427,12 @@ namespace SatrancOdevi
             int r = r1 + rArtis;
             int c = c1 + cArtis;
 
-            // Hedef kareye gelene kadar aradaki karelere bak
+            // hedef kareye gelene kadar aradaki karelere bak
             while (r != r2 || c != c2)
             {
                 if (oyunTahtasi[r, c] != null)
                 {
-                    return false; // Arada taş var
+                    return false; // arada taş var
                 }
 
                 r += rArtis;
