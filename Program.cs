@@ -28,7 +28,62 @@ namespace CHESS_PROJECT
             ChoosingMode();
         }
 
-  
+       
+
+        public static void OyunuKaydet()
+        {
+            using (StreamWriter sw = new StreamWriter("kayit.txt"))
+            {
+                
+                sw.WriteLine(siraKirmizida);
+                sw.WriteLine(enPassantSutun);
+
+                sw.WriteLine(kirmiziSahOynadi);
+                sw.WriteLine(kirmiziSolKaleOynadi);
+                sw.WriteLine(kirmiziSagKaleOynadi);
+                sw.WriteLine(maviSahOynadi);
+                sw.WriteLine(maviSolKaleOynadi);
+                sw.WriteLine(maviSagKaleOynadi);
+
+                // Sonra tahtayı kaydet
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        if (tahta[i, j] == " ") sw.WriteLine("EMPTY");
+                        else sw.WriteLine(tahta[i, j]);
+                    }
+                }
+            }
+        }
+
+        public static void OyunuYukle()
+        {
+            if (!File.Exists("kayit.txt")) return;
+
+            using (StreamReader sr = new StreamReader("kayit.txt"))
+            {
+                siraKirmizida = bool.Parse(sr.ReadLine());
+                enPassantSutun = int.Parse(sr.ReadLine());
+
+                kirmiziSahOynadi = bool.Parse(sr.ReadLine());
+                kirmiziSolKaleOynadi = bool.Parse(sr.ReadLine());
+                kirmiziSagKaleOynadi = bool.Parse(sr.ReadLine());
+                maviSahOynadi = bool.Parse(sr.ReadLine());
+                maviSolKaleOynadi = bool.Parse(sr.ReadLine());
+                maviSagKaleOynadi = bool.Parse(sr.ReadLine());
+
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        string okunan = sr.ReadLine();
+                        tahta[i, j] = (okunan == "EMPTY") ? " " : okunan;
+                    }
+                }
+            }
+        }
+
         public static void ChoosingMode()
         {
         
@@ -44,7 +99,24 @@ namespace CHESS_PROJECT
                 switch (input)
                 {
                     case "1":
-                        GameMode(false);
+                        if (File.Exists("kayit.txt"))
+                        {
+                            Console.Write("There is a saved game. Continue? (Y/N): ");
+                            string cvp = Console.ReadLine().ToUpper();
+
+                            if (cvp == "Y")
+                            {
+                                GameMode(true);
+                            }
+                            else
+                            {
+                                GameMode(false);
+                            }
+                        }
+                        else
+                        {
+                            GameMode(false);
+                        }
                         break;
                     case "2":
                         DemoMode();
@@ -191,9 +263,19 @@ namespace CHESS_PROJECT
         {
             if (!devamEdiliyor)
             {
-                TahtayiDiz(); 
+                TahtayiDiz();
                 siraKirmizida = true;
                 oyunBitti = false;
+
+                // Yeni oyun başlarken rok ve en passant haklarını sıfırlamak iyi olur
+                enPassantSutun = -1;
+                kirmiziSahOynadi = false; kirmiziSolKaleOynadi = false; kirmiziSagKaleOynadi = false;
+                maviSahOynadi = false; maviSolKaleOynadi = false; maviSagKaleOynadi = false;
+            }
+            else
+            {
+                // --- EKLEME 1: Eğer devam ediliyorsa dosyadan oku ---
+                OyunuYukle();
             }
 
             while (!oyunBitti)
@@ -209,11 +291,14 @@ namespace CHESS_PROJECT
                     if (hamleKalmadi)
                     {
                         Console.WriteLine("\nCHECK MATE! GAME OVER!");
-                        Console.WriteLine("Winner: " + (!siraKirmizida ? "RED" : "BLUE")); 
+                        Console.WriteLine("Winner: " + (!siraKirmizida ? "RED" : "BLUE"));
                         Console.ReadKey();
-                        break; 
+
+                        // Oyun bittiği için kayıt dosyasını silebilirsin (isteğe bağlı)
+                        if (File.Exists("kayit.txt")) File.Delete("kayit.txt");
+                        break;
                     }
-                    Console.WriteLine("\nCHECK!"); 
+                    Console.WriteLine("\nCHECK!");
                 }
                 else
                 {
@@ -221,6 +306,7 @@ namespace CHESS_PROJECT
                     {
                         Console.WriteLine("\nSTALEMATE (PAT)! GAME DRAW!");
                         Console.ReadKey();
+                        if (File.Exists("kayit.txt")) File.Delete("kayit.txt");
                         break;
                     }
                 }
@@ -248,16 +334,24 @@ namespace CHESS_PROJECT
                     Console.ResetColor();
                     Console.WriteLine("Press any key to continue...");
                     Console.ReadKey();
-                    continue; 
+                    continue;
                 }
 
                 if (string.IsNullOrEmpty(giris)) continue;
-                if (giris.ToLower() == "exit") return;
+
+                // --- EKLEME 2: Çıkış yapılırken kaydet ---
+                if (giris.ToLower() == "exit")
+                {
+                    OyunuKaydet(); // Çıkmadan önce kaydet
+                    Console.WriteLine("Game saved...");
+                    System.Threading.Thread.Sleep(1000); // Kullanıcı görsün diye azıcık bekleme
+                    return;
+                }
 
                 if (HamleCozVeOyna(giris))
                 {
-                    PiyonTerfiKontrol(); 
-                    siraKirmizida = !siraKirmizida; 
+                    PiyonTerfiKontrol();
+                    siraKirmizida = !siraKirmizida;
                 }
                 else
                 {
@@ -266,7 +360,6 @@ namespace CHESS_PROJECT
                 }
             }
         }
-
         public static string OzelSatirOku(out bool ipucuTetiklendi)
         {
             StringBuilder yazi = new StringBuilder(); 
